@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Untitled Document</title>
+
+<script type="text/javascript" src="/js/jquery-1.11.0.js"></script>
+<script>
+$(window).load(function(){
+		
+	/*
+	Class Look Up: respond-wrap
+	*/
+	if($('div').hasClass('respond-wrap')) { // begin class lookup
+	
+		/* Number Format */
+		function format(x) {
+			return isNaN(x)?"":x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+		}
+		
+		/* Global Page Variables */
+		var currentPage = "http://www.speedwaymotors.com";
+		var currentTitle = $('.respond-wrap h1').text();
+		//var currentPage = window.location.href; 
+		
+		/* Social Share: Facebook JSON */
+		$.getJSON("https://graph.facebook.com/fql?q=SELECT url, share_count FROM link_stat WHERE url='"+currentPage+"'", function(data) {
+			$('#facebook_page_share_count').text(format(data.data[0].share_count));
+		});
+		
+		/* Social Share: Twitter JSON */
+		$.getJSON("http://urls.api.twitter.com/1/urls/count.json?url="+currentPage+"&callback=?", function(data) {
+			$('#twitter_page_share_count').text(format(data.count));
+		});
+		
+		/* Social Share: Google Plus JSON */
+		var data = {
+			"method":"pos.plusones.get",
+			"id":currentPage,
+			"params":{
+				"nolog":true,
+				"id":currentPage,
+				"source":"widget",
+				"userId":"@viewer",
+				"groupId":"@self"
+			},
+			"jsonrpc":"2.0",
+			"key":"p",
+			"apiVersion":"v1"
+		};
+		$.ajax({
+			type: "POST",
+			url: "https://clients6.google.com/rpc",
+			processData: true,
+			contentType: 'application/json',
+			data: JSON.stringify(data),
+			success: function(r){
+				$('#googleplus_page_share_count').text(format(r.result.metadata.globalCounts.count));
+			}
+		
+		});
+		
+		/* Inject Social Share Count Widget: HTML */
+		$(".respond-wrap h3").after($('<!-- SMI Social Media Sharing -->'+
+		'<div class="smi_sm_widget"><span class="smi_share_txt">Share</span> <a title="Share this article on Facebook" href="http://www.facebook.com/share.php?u='+currentPage+'&amp;title='+currentTitle+'" target="_blank"> <span class="sm_node"> <span class="new15_node1"> <img src="http://www.cadillacloftslincoln.com/img/smi_share_micro_facebook.jpg" alt="Share this article on Facebook" /> </span> <span class="new15_node2" style="background: rgba(60,90,152,.5);"> <span id="facebook_page_share_count" class="node15_digit" style="color: rgba(60,90,152,.75);"></span> </span> </span> </a> <a title="Share this article on Twitter" href="http://twitter.com/intent/tweet?status='+currentTitle+'+'+currentPage+'" target="_blank"> <span class="sm_node"> <span class="new15_node1"> <img src="http://www.cadillacloftslincoln.com/img/smi_share_micro_twitter.jpg" alt="Share this article on Twitter" /> </span> <span class="new15_node2" style="background: rgba(45,170,226,.5);"> <span id="twitter_page_share_count" class="node15_digit" style="color: rgba(45,170,226,.75);"></span> </span> </span> </a> <a title="Share this article on Google Plus" href="https://plus.google.com/share?url='+currentPage+'" target="_blank"> <span class="sm_node"> <span class="new15_node1"> <img src="http://www.cadillacloftslincoln.com/img/smi_share_micro_googlePlus.jpg" alt="Share this article on Google Plus" /> </span> <span class="new15_node2" style="background: rgba(221,76,57,.5);"> <span id="googleplus_page_share_count" class="node15_digit" style="color: rgba(221,76,57,.75);">9,000</span> </span> </span> </a></div>'+
+		'<!-- /SMI Social Media Sharing -->').hide().fadeIn(1500));
+
+		/* Inject Social Share Count Widget: CSS */
+		$(".respond-wrap").before('<style type="text/css">'+
+		'/* ******************* */'+
+		'/* Social Media Widget */'+
+		'/* ******************* */'+
+		'.smi_sm_widget {'+
+			'display: inline-block;'+
+			'position: relative;'+
+			'margin: 0 -4px 0 0;'+
+			'padding: 0 0 0 0;'+
+			'top: -45px;'+
+			'float: right!important;'+
+			'text-indent: 0px!important;'+
+			'clear: both;'+
+		'}'+
+		'.smi_sm_widget a {'+
+			'display:inline-table;'+
+			'text-decoration:none;'+
+			'margin:0;'+
+			'padding:0;'+
+			'float:left!important;'+
+		'}'+
+		'.sm_node {'+
+			'display:block;'+
+			'margin:0 2px 0 0;'+
+			'padding:0 0 0 0;'+
+			'float:left!important;'+
+		'}'+
+		'.smi_sm_widget .smi_share_txt {'+
+			'display:inline-table;'+
+			'float:left!important;'+
+			'font-size:10px;'+
+			'font-family:Arial, Helvetica, sans-serif;'+
+			'font-weight:bold;'+
+			'color:#555;'+
+			'background:#ddd;'+
+			'padding:2px 8px 2px 10px;'+
+			'margin:0 2px 0 0;'+
+			'line-height:15px;'+
+			'height:15px;'+
+		'}'+
+		'.sm_node .new15_node1 {'+
+			'display:inline-block;'+
+			'margin:0 0 0 0;'+
+			'padding:0;'+
+			'width:19px;'+
+			'height:19px;'+
+			'line-height:12px;'+
+			'float:left!important;'+
+		'}'+
+		'.sm_node .new15_node2 .node15_digit {'+
+			'background:rgba(255,255,255,.5);'+
+			'border-radius:3px;'+
+			'display:inline-block;'+
+			'line-height:15px;'+
+			'width:auto;'+
+			'height:auto;'+
+			'padding:0 4px 0 4px;'+
+			'margin:0;'+
+		'}'+
+		'.sm_node .new15_node1 img {'+
+			'display:block;'+
+			'width:19px;'+
+			'height:19px;'+
+			'margin:0;'+
+			'padding:0!important;'+
+		'}'+
+		'.sm_node .new15_node2 {'+
+			'display:inline-block;'+
+			'margin:0 0 0 0;'+
+			'padding:2px 3px 2px 3px;'+
+			'color:rgba(255,255,255,.7);'+
+			'font-size:10px;'+
+			'font-family:Arial, Helvetica, sans-serif;'+
+			'font-weight:normal;'+
+			'height:19px;'+
+			'line-height:15px;'+
+			'float:left!important;'+
+		'}'+
+		'@media screen and (max-width: 600px) {'+
+			'.smi_sm_widget {'+
+				'display: inline-block;'+
+				'position: relative;'+
+				'top: -25px!important;'+
+				'margin: 10px 0 10px 4px;'+
+				'padding: 0 0 0 0;'+
+				'float: left!important;'+
+				'text-indent: 0px!important;'+
+				'clear: both;'+
+			'}'+
+			'.smi_sm_widget + p {'+
+				'clear:both!important;'+
+			'}'+
+		'}'+
+		'</style>');
+		
+			
+	}; // End class lookup
+	
+
+});
+</script>
+
+<style>
+.hideGPOCounter {
+	/*display:none;*/
+}
+</style>
+</head>
+
+<body>
+
+<div id="injectCount"></div>
+
+<div class="respond-wrap">
+	<h1>Unique Title For This Page</h1>
+	<h3><span class="clockIcon">&nbsp;</span> Social Share Count Widget</h3>
+</div>
+
+</body>
+</html>
