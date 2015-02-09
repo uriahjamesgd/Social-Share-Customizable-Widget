@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Untitled Document</title>
+
+<script type="text/javascript" src="http://static.summaelite.com/js/jquery-1.11.0.js"></script>
+
+<script type="text/javascript">
+$(function() {
+	
+	$('.getURL').click(function () {
+		
+		/* Number Format */
+		function format(x) {
+			return isNaN(x)?"":x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+		}
+		
+		var currentPage = setURL = $('.setURL').val();
+		
+		/* Social Share: Facebook JSON */
+		$.getJSON("https://graph.facebook.com/fql?q=SELECT url, share_count FROM link_stat WHERE url='"+currentPage+"'", function(data) {
+			$('#inject_facebook').text(format(data.data[0].share_count));
+		});
+		
+		/* Social Share: Twitter JSON */
+		$.getJSON("http://urls.api.twitter.com/1/urls/count.json?url="+currentPage+"&callback=?", function(data) {
+			$('#inject_twitter').text(format(data.count));
+		});
+		
+		/* Social Share: Pinterest JSON */
+		$.getJSON("http://api.pinterest.com/v1/urls/count.json?url="+currentPage+"&callback=?", function(data) {
+			$('#inject_pinterest').text(format(data.count));
+			
+		});
+		
+		/* Social Share: LinkedIn JSON */
+		$.getJSON("https://www.linkedin.com/countserv/count/share?url="+currentPage+"&callback=?", function(data) {
+			$('#inject_linkedin').text(format(data.count));
+			
+		});
+		
+		
+		/* Social Share: Google Plus JSON */
+		var data = {
+			"method":"pos.plusones.get",
+			"id":currentPage,
+			"params":{
+				"nolog":true,
+				"id":currentPage,
+				"source":"widget",
+				"userId":"@viewer",
+				"groupId":"@self"
+			},
+			"jsonrpc":"2.0",
+			"key":"p",
+			"apiVersion":"v1"
+		};
+		$.ajax({
+			type: "POST",
+			url: "https://clients6.google.com/rpc",
+			processData: true,
+			contentType: 'application/json',
+			data: JSON.stringify(data),
+			success: function(r){
+				$('#inject_googleplus').text(format(r.result.metadata.globalCounts.count));
+			}
+		
+		});
+		
+    });
+	
+});
+</script>
+
+<style type="text/css">
+body {margin:50px;font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;font-size:14px;color:#06C;}
+h1 {font-weight:bold;font-family:"Arial Black", Gadget, sans-serif;}
+h2 {line-height:6px;}
+h5 {line-height:2px;}
+span.shareWrap {width: 125px;display: inline-block;line-height:22px;}
+span.shareCount {width:80px;display:inline-block;line-height:22px;color:rgba(0,0,0,.5);text-align:right;padding-right:15px;}
+span.shareWrap:nth-child(odd) {background:#eeeeee;}
+span.shareCount:nth-child(even) {background:#eeeeee;}
+.setURL {width:400px;color:#06C;font-size:16px;outline:none;border:1px solid #06C;padding:3px 5px;line-height:24px;}
+.getURL {width:100px;color:#fff;background:#06C;font-size:16px;outline:none;border:1px solid #06C;padding:3px 5px;line-height:24px;cursor:pointer;}
+.getURL:hover {background:#0066FF;}
+.getURL:active {background:#09F;}
+</style>
+</head>
+
+<body>
+
+<h1>Social Media Share Counts for any URL:</h1>
+
+<br/><br/>
+
+<h2>Page URL:</h2>
+<h5>Enter the page URL that you would like share counts for</h5>
+<input type="text" class="setURL" value="http://google.com" />
+<input type="button" class="getURL" value="Go!" />
+
+<br/><br/><br/>
+
+<h2>Share Count:</h2>
+<h5>Here are your results</h5>
+<span class="shareWrap">Facebook: </span><span id="inject_facebook" class="shareCount"></span><br/>
+<span class="shareWrap">Twitter: </span><span id="inject_twitter" class="shareCount"></span><br/>
+<span class="shareWrap">Google Plus: </span><span id="inject_googleplus" class="shareCount"></span><br/>
+<span class="shareWrap">Pinterest: </span><span id="inject_pinterest" class="shareCount"></span><br/>
+<span class="shareWrap">LinkedIn: </span><span id="inject_linkedin" class="shareCount"></span><br/>
+
+</body>
+</html>
